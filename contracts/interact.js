@@ -6,6 +6,48 @@ import "dotenv";
 
 const CONTRACT_ABI = [
   {
+    inputs: [],
+    stateMutability: "nonpayable",
+    type: "constructor",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "uint16",
+        name: "voterID",
+        type: "uint16",
+      },
+      {
+        indexed: false,
+        internalType: "uint16",
+        name: "candidateID",
+        type: "uint16",
+      },
+    ],
+    name: "Voted",
+    type: "event",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint16",
+        name: "_id",
+        type: "uint16",
+      },
+      {
+        internalType: "uint16",
+        name: "_candidateID",
+        type: "uint16",
+      },
+    ],
+    name: "Vote",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
     inputs: [
       {
         internalType: "string",
@@ -35,48 +77,6 @@ const CONTRACT_ABI = [
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
-  },
-  {
-    inputs: [],
-    stateMutability: "nonpayable",
-    type: "constructor",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint16",
-        name: "_id",
-        type: "uint16",
-      },
-      {
-        internalType: "uint16",
-        name: "_candidateID",
-        type: "uint16",
-      },
-    ],
-    name: "Vote",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "uint16",
-        name: "voterID",
-        type: "uint16",
-      },
-      {
-        indexed: false,
-        internalType: "uint16",
-        name: "candidateID",
-        type: "uint16",
-      },
-    ],
-    name: "Voted",
-    type: "event",
   },
   {
     inputs: [],
@@ -166,7 +166,7 @@ const CONTRACT_ABI = [
   },
 ];
 
-const CONTRACT_ADDRESS = "0x6579A896A5a2cDfc9169AD381b13fF577D09AF39";
+const CONTRACT_ADDRESS = "0x351063D4800CCC8f0B656531A224c1D9701104E4";
 
 const web3 = new Web3("https://rpc2.sepolia.org");
 
@@ -189,7 +189,7 @@ app.get("/addVoter", async (req, res) => {
       .addVoter(voterID, walletAddress)
       .send({
         from: account[0].address,
-        gasLimit: 500000,
+        gasLimit: 3000000,
         gasPrice,
       });
 
@@ -207,13 +207,11 @@ app.get("/addCandidate", async (req, res) => {
 
     const gasPrice = await web3.eth.getGasPrice();
 
-    const transaction = await myContract.methods
-      .addCandidate(name)
-      .send({
-        from: account[0].address,
-        gasLimit: 500000,
-        gasPrice,
-      });
+    const transaction = await myContract.methods.addCandidate(name).send({
+      from: account[0].address,
+      gasLimit: 3000000,
+      gasPrice,
+    });
 
     res
       .status(200)
@@ -231,16 +229,20 @@ app.get("/getCount", async (req, res) => {
 
     const candidateList = [];
 
-    for (let i = 0; i < candidateCount; i++){
-        const candidate = await myContract.methods.candidates(i).call();
-        candidateList.push({name : candidate.name , ID: candidate.canditID.toString() , voteCount: candidate.voteCount.toString()});
-    } 
+    for (let i = 0; i < candidateCount; i++) {
+      const candidate = await myContract.methods.candidates(i).call();
+      candidateList.push({
+        name: candidate.name,
+        ID: candidate.canditID.toString(),
+        voteCount: candidate.voteCount.toString(),
+      });
+    }
 
     res.status(200).json({
       voterCount: voterCount.toString(),
       candidateCount: candidateCount.toString(),
       voted: voted.toString(),
-      candidateList: candidateList
+      candidateList: candidateList,
     });
   } catch (error) {
     res.status(500).json({ success: false, error: "Failed to add candidate" });
@@ -258,7 +260,7 @@ app.get("/vote", async (req, res) => {
       .Vote(voterID, candidateID)
       .send({
         from: account[0].address,
-        gasLimit: 500000,
+        gasLimit: 3000000,
         gasPrice,
       });
 
