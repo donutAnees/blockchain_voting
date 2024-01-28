@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-const item = [{item : "Login" , link : "/login"}, {item: "Register" , link : "/register" }];
+const item = [{item : "Login" , link : "/login"}, {item: "Register" , link : "/register" },{item: "Live Poll" , link : "/poll" }];
 
 export default function Navlist() {
   return (

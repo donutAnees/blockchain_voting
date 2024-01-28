@@ -7,6 +7,8 @@ import Home from "./pages/Home";
 import Verify from "./pages/Verify";
 import { useState } from "react";
 import { MetaMaskProvider } from "@metamask/sdk-react";
+import Vote from "./pages/Vote";
+import Poll from "./pages/Poll";
 
 function App() {
   const [account, setAccount] = useState("");
@@ -37,6 +39,15 @@ function App() {
               element: <Verify setAccount={setAccount}></Verify>,
             },
           ],
+        },
+        {
+          path: "/vote",
+          element: <Vote></Vote>,
+        },
+
+        {
+          path: "/poll",
+          element: <Poll></Poll>,
         },
       ],
     },

@@ -1,13 +1,12 @@
 import React, { useState } from "react";
 import { useSDK } from "@metamask/sdk-react";
-import { useNavigate } from "react-router-dom";
 
 export default function Verify({ setAccount }) {
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false); // State to track loading
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState(""); // State to hold the message
 
   const { sdk } = useSDK();
-  const navigate = useNavigate();
 
   const connect = async () => {
     try {
@@ -15,33 +14,35 @@ export default function Verify({ setAccount }) {
       setAccount(accounts?.[0]);
       window.localStorage.setItem("account", JSON.stringify(accounts?.[0]));
     } catch (err) {
-      alert(`failed to connect..`, err);
+      setMessage(`Failed to connect: ${err.message}`); // Set error message
     }
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setLoading(true); // Set loading to true on form submission
+    setLoading(true);
     connect();
     const voterId = JSON.parse(window.localStorage.getItem("voterId"));
     const acc = JSON.parse(window.localStorage.getItem("account"));
-    console.log(voterId);
-    console.log(acc);
     try {
-    //   const response = await fetch(
-    //     `http://localhost:8080/addVoter?voterID=${voterId}&walletAddress=${acc}`,
-    //     {
-    //       method: "GET",
-    //     }
-    //   );
-    const response = await fetch(`http://localhost:8080/addCandidate?name=${voterId}`)
+      const response = await fetch(
+        `http://localhost:8080/addVoter?voterID=${voterId}&walletAddress=${acc}`,
+        {
+          method: "GET",
+        }
+      );
       const data = await response.json();
-      console.log(data);
       setPassword("");
+      if (data.success) {
+        setMessage("You are successfully registered"); // Set success message
+      } else {
+        setMessage(data.error); // Set error message
+      }
     } catch (error) {
       console.error("Error:", error);
+      setMessage("An error occurred while processing your request."); // Set generic error message
     } finally {
-      setLoading(false); // Set loading to false after response is received
+      setLoading(false);
     }
   };
 
@@ -63,10 +64,13 @@ export default function Verify({ setAccount }) {
         <button
           type="submit"
           className="w-full py-2 px-4 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:bg-blue-600"
-          disabled={loading} // Disable button while loading
+          disabled={loading}
         >
           {loading ? "Loading..." : "Submit"}
         </button>
+        {message && (
+          <p className="mt-2 text-center text-red-500">{message}</p> // Render message if present
+        )}
       </form>
     </div>
   );

@@ -47,9 +47,10 @@ contract Voting{
         voterCount++;
     }
 
-    function Vote(uint16 _id , uint16 _candidateID) public {
+    function Vote(uint16 _id , uint16 _candidateID, address walletAddress) public {
         require(voters[_id].exists,"User doesnt exist");
         require(!voters[_id].voted,"You have already voted");
+        require(walletAddress == voters[_id].walletAddress, "Use your registered wallet");
         voters[_id].voted = true;
         candidates[_candidateID].voteCount++;
         voted++;

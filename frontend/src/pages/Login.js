@@ -13,14 +13,14 @@ export default function Login({ account, setAccount }) {
       const acc = JSON.parse(window.localStorage.getItem("account"));
       if (acc && acc.length > 0) setAccount(acc);
     }
-  }, []);
+  }, [account,setAccount]);
 
   const connect = async () => {
     try {
       const accounts = await sdk?.connect();
       setAccount(accounts?.[0]);
       window.localStorage.setItem("account", JSON.stringify(accounts?.[0]));
-      navigate("/");
+      navigate("/vote");
     } catch (err) {
       alert(`failed to connect..`, err);
     }
