@@ -174,6 +174,8 @@ const myContract = new web3.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS);
 
 const account = web3.eth.accounts.wallet.add(process.env.PRIVATE_KEY);
 
+const PORT = process.env.PORT || 8080;
+
 const app = express();
 
 app.get("/addVoter", async (req, res) => {
@@ -268,6 +270,6 @@ app.get("/vote", async (req, res) => {
   }
 });
 
-app.listen(8080, () => {
-  console.log(`Server listening at http://localhost:8080`);
+app.listen(PORT, () => {
+  console.log(`Server listening at http://localhost:${PORT}`);
 });
