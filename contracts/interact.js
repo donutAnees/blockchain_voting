@@ -6,58 +6,11 @@ import "dotenv";
 
 const CONTRACT_ABI = [
   {
-    inputs: [],
-    stateMutability: "nonpayable",
-    type: "constructor",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "uint16",
-        name: "voterID",
-        type: "uint16",
-      },
-      {
-        indexed: false,
-        internalType: "uint16",
-        name: "candidateID",
-        type: "uint16",
-      },
-    ],
-    name: "Voted",
-    type: "event",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint16",
-        name: "_id",
-        type: "uint16",
-      },
-      {
-        internalType: "uint16",
-        name: "_candidateID",
-        type: "uint16",
-      },
-    ],
-    name: "Vote",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
     inputs: [
       {
         internalType: "string",
         name: "_name",
         type: "string",
-      },
-      {
-        internalType: "uint16",
-        name: "_candidateID",
-        type: "uint16",
       },
     ],
     name: "addCandidate",
@@ -85,6 +38,48 @@ const CONTRACT_ABI = [
   },
   {
     inputs: [],
+    stateMutability: "nonpayable",
+    type: "constructor",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint16",
+        name: "_id",
+        type: "uint16",
+      },
+      {
+        internalType: "uint16",
+        name: "_candidateID",
+        type: "uint16",
+      },
+    ],
+    name: "Vote",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "uint16",
+        name: "voterID",
+        type: "uint16",
+      },
+      {
+        indexed: false,
+        internalType: "uint16",
+        name: "candidateID",
+        type: "uint16",
+      },
+    ],
+    name: "Voted",
+    type: "event",
+  },
+  {
+    inputs: [],
     name: "admin",
     outputs: [
       {
@@ -101,9 +96,9 @@ const CONTRACT_ABI = [
     name: "candidateCount",
     outputs: [
       {
-        internalType: "uint256",
+        internalType: "uint16",
         name: "",
-        type: "uint256",
+        type: "uint16",
       },
     ],
     stateMutability: "view",
@@ -171,7 +166,7 @@ const CONTRACT_ABI = [
   },
 ];
 
-const CONTRACT_ADDRESS = "0x45378EE4029039c0a305128567A8e0Ae2D9950dd";
+const CONTRACT_ADDRESS = "0x6579A896A5a2cDfc9169AD381b13fF577D09AF39";
 
 const web3 = new Web3("https://rpc2.sepolia.org");
 
@@ -185,8 +180,8 @@ app.get("/addVoter", async (req, res) => {
   try {
     const voterID = req.query.voterID;
     const walletAddress = req.query.walletAddress;
-
     const gasPrice = await web3.eth.getGasPrice();
+    //const gasPrice = 30000000000;
 
     const transaction = await myContract.methods
       .addVoter(voterID, walletAddress)
@@ -207,12 +202,11 @@ app.get("/addVoter", async (req, res) => {
 app.get("/addCandidate", async (req, res) => {
   try {
     const name = req.query.name;
-    const candidateID = req.query.candidateID;
 
     const gasPrice = await web3.eth.getGasPrice();
 
     const transaction = await myContract.methods
-      .addCandidate(name, candidateID)
+      .addCandidate(name)
       .send({
         from: account[0].address,
         gasLimit: 500000,
@@ -233,10 +227,18 @@ app.get("/getCount", async (req, res) => {
     const candidateCount = await myContract.methods.candidateCount().call();
     const voted = await myContract.methods.voted().call();
 
+    const candidateList = [];
+
+    for (let i = 0; i < candidateCount; i++){
+        const candidate = await myContract.methods.candidates(i).call();
+        candidateList.push({name : candidate.name , ID: candidate.canditID.toString() , voteCount: candidate.voteCount.toString()});
+    } 
+
     res.status(200).json({
       voterCount: voterCount.toString(),
       candidateCount: candidateCount.toString(),
       voted: voted.toString(),
+      candidateList: candidateList
     });
   } catch (error) {
     res.status(500).json({ success: false, error: "Failed to add candidate" });
@@ -266,6 +268,6 @@ app.get("/vote", async (req, res) => {
   }
 });
 
-app.listen(3000, () => {
-  console.log(`Server listening at http://localhost:3000`);
+app.listen(8080, () => {
+  console.log(`Server listening at http://localhost:8080`);
 });
